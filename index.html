@@ -588,9 +588,7 @@
   </main>
 
   <script>
-    const CWA_KEY = "CWA-C5C92ABF-B103-4A78-AC3C-5E468DEC784D";
-    const MOENV_KEY = "e8dd42e6-9b8b-43f8-991e-b3dee723a52d";
-    const CWA_BASE = "https://opendata.cwa.gov.tw/api/v1/rest/datastore";
+    const API_BASE = "";
     const AI_PROXY_URL = "";
 
     const CITY_DATASETS = {
@@ -673,38 +671,10 @@
       $("sourceText").textContent = message || `資料來源：${source}`;
     }
 
-    function datasetFor7Day(city) {
-      const base = CITY_DATASETS[city] || CITY_DATASETS[FALLBACK_LOCATION.city];
-      return String(Number(base) + 2).padStart(3, "0");
-    }
-
-    function cwaUrl(dataset, params = {}) {
-      const url = new URL(`${CWA_BASE}/${dataset}`);
-      url.searchParams.set("Authorization", CWA_KEY);
-      url.searchParams.set("format", "JSON");
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          url.searchParams.set(key, value);
-        }
-      });
-      return url.toString();
-    }
-
     async function fetchJson(url) {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json();
-    }
-
-    async function safeJson(url) {
-      try {
-        const json = await fetchJson(url);
-        if (json.success === false || json.success === "false") return null;
-        return json;
-      } catch (error) {
-        console.warn("fetch failed", url, error);
-        return null;
-      }
     }
 
     function listFromMaybe(value) {
@@ -961,68 +931,16 @@
     async function loadWeather(place) {
       const city = CITY_DATASETS[place.city] ? place.city : FALLBACK_LOCATION.city;
       const district = place.district || FALLBACK_LOCATION.district;
-      const baseId = CITY_DATASETS[city];
-      const id7 = datasetFor7Day(city);
+      const url = new URL(`${API_BASE}/api/weather`, window.location.origin);
+      url.searchParams.set("city", city);
+      url.searchParams.set("district", district);
+      url.searchParams.set("source", place.source || "手動輸入");
 
-      const [forecast3d, forecast7d, city36h, obs, rainObs, uviObs, aqi] = await Promise.all([
-        safeJson(cwaUrl(`F-D0047-${baseId}`, { locationName: district })),
-        safeJson(cwaUrl(`F-D0047-${id7}`, { locationName: district })),
-        safeJson(cwaUrl("F-C0032-001", { locationName: city })),
-        safeJson(cwaUrl("O-A0001-001")),
-        safeJson(cwaUrl("O-A0002-001")),
-        safeJson(cwaUrl("O-A0005-001")),
-        safeJson(`https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&api_key=${MOENV_KEY}&limit=1000&format=JSON`)
-      ]);
-
-      const loc3d = pickForecastLocation(forecast3d, district);
-      const loc7d = pickForecastLocation(forecast7d, district);
-      const station = findStation(obs, district, city);
-      const rainStation = findStation(rainObs, district, city);
-      const aqiRow = findAqi(aqi, city, district);
-      const uviRow = findUvi(uviObs, city);
-      const cityFallback = cityForecastFallback(city36h, city);
-
-      const currentRain = cleanRain(stationValue(rainStation, ["Now.Precipitation", "Past1hr.Precipitation", "Precipitation"], "0"));
-      const current = {
-        city,
-        district,
-        temp: stationValue(station, ["AirTemperature", "Temperature"], valueAt(loc3d, "temp")),
-        wx: valueAt(loc3d, "wx", 0, cityFallback?.wx || "未提供"),
-        max: valueAt(loc7d, "max", 0, valueAt(loc3d, "max", 0, cityFallback?.max || "--")),
-        min: valueAt(loc7d, "min", 0, valueAt(loc3d, "min", 0, cityFallback?.min || "--")),
-        rh: stationValue(station, ["RelativeHumidity"], valueAt(loc3d, "rh")),
-        wind: stationValue(station, ["WindSpeed"], valueAt(loc3d, "wind")),
-        windDir: stationValue(station, ["WindDirection"], valueAt(loc3d, "windDir")),
-        visibility: stationValue(station, ["VisibilityDescription", "Visibility"], "未提供"),
-        apparent: valueAt(loc3d, "apparent", 0, stationValue(station, ["AirTemperature"], "--")),
-        comfort: valueAt(loc3d, "comfort", 0, "--"),
-        rain: currentRain,
-        pop: valueAt(loc3d, "pop3h", 0, valueAt(loc3d, "pop6h", 0, valueAt(loc3d, "pop12h", 0, cityFallback?.pop || "--"))),
-        uvi: uviRow?.UVIndex || uviRow?.uvi || valueAt(loc7d, "uvi"),
-        aqi: aqiRow?.aqi || "--",
-        aqiStatus: aqiRow?.status || "未提供",
-        pm25: aqiRow?.["pm2.5"] || "--"
-      };
-
-      const hourly = buildHourly(loc3d, current.rain);
-      const daily = buildDaily(loc7d);
-      const missing = [
-        !loc3d && "鄉鎮預報",
-        !cityFallback && "36小時縣市預報",
-        !station && "即時觀測",
-        !rainStation && "雨量站",
-        !aqiRow && "AQI",
-        !uviRow && "UVI"
-      ].filter(Boolean);
-
-      return {
-        place: { city, district, source: place.source || "手動輸入" },
-        current,
-        hourly,
-        daily,
-        missing,
-        updatedAt: formatUpdated()
-      };
+      const data = await fetchJson(url.toString());
+      if (!data?.current) {
+        throw new Error("後端沒有回傳天氣資料");
+      }
+      return data;
     }
 
     async function fetchAiAdvice(data) {
