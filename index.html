@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7fbff" />
+  <title>氣象穿搭顧問</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #edf4f8;
+      --card: #ffffff;
+      --soft: #f4f8fb;
+      --text: #071832;
+      --sub: #5f7088;
+      --line: #d7e3ee;
+      --blue: #1868f2;
+      --cyan: #18a4b8;
+      --green: #13835f;
+      --amber: #a66100;
+      --red: #bd2f45;
+      --shadow: 0 14px 36px rgba(7, 24, 50, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(160deg, rgba(24, 104, 242, 0.15), transparent 36%),
+        linear-gradient(180deg, #f9fcff 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+
+    .phone {
+      width: min(460px, 100%);
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 4px 2px 12px;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--sub);
+      font-size: 0.78rem;
+      margin-bottom: 2px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.08rem;
+      letter-spacing: 0;
+    }
+
+    .icon-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn,
+    .btn {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text);
+      border-radius: 999px;
+      cursor: pointer;
+      min-height: 40px;
+    }
+
+    .icon-btn {
+      width: 42px;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+    }
+
+    .btn {
+      padding: 9px 14px;
+      font-weight: 700;
+    }
+
+    .btn.primary,
+    .icon-btn.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .btn:disabled,
+    .icon-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .weather-card,
+    .sheet {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(215, 227, 238, 0.95);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .weather-card {
+      min-height: 352px;
+      padding: 20px;
+      display: grid;
+      align-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .weather-card::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 44%;
+      background: linear-gradient(180deg, transparent, rgba(24, 104, 242, 0.09));
+      pointer-events: none;
+    }
+
+    .place-row,
+    .temp-row,
+    .status-row {
+      position: relative;
+      z-index: 1;
+    }
+
+    .place-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .place {
+      min-width: 0;
+    }
+
+    .place-label {
+      color: var(--sub);
+      font-size: 0.82rem;
+      margin-bottom: 4px;
+    }
+
+    .place-name {
+      margin: 0;
+      font-size: clamp(1.55rem, 7vw, 2.35rem);
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .updated {
+      color: var(--sub);
+      font-size: 0.78rem;
+      text-align: right;
+      white-space: nowrap;
+      padding-top: 4px;
+    }
+
+    .temp-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: end;
+      gap: 12px;
+      margin-top: 42px;
+    }
+
+    .temp {
+      font-size: clamp(5.8rem, 25vw, 8.1rem);
+      line-height: 0.82;
+      letter-spacing: 0;
+      font-weight: 760;
+    }
+
+    .temp sup {
+      font-size: 0.24em;
+      top: -1.9em;
+      position: relative;
+    }
+
+    .condition {
+      min-width: 0;
+      padding-bottom: 8px;
+    }
+
+    .condition-main {
+      font-size: 1.34rem;
+      font-weight: 780;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .condition-sub {
+      color: var(--sub);
+      line-height: 1.45;
+      margin-top: 6px;
+      font-size: 0.92rem;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      background: #e9f3ff;
+      color: var(--blue);
+      white-space: nowrap;
+    }
+
+    .source {
+      color: var(--sub);
+      font-size: 0.78rem;
+      text-align: right;
+    }
+
+    .sheet {
+      padding: 16px;
+      margin-top: 12px;
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .sheet h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .sheet-note {
+      color: var(--sub);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .manual {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+    }
+
+    .field {
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      padding: 8px 10px;
+    }
+
+    .hour-strip {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 86px;
+      gap: 9px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      padding: 1px 1px 6px;
+      scrollbar-width: none;
+    }
+
+    .hour-strip::-webkit-scrollbar { display: none; }
+
+    .hour-card {
+      min-height: 142px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      border-radius: 8px;
+      padding: 10px 8px;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      gap: 5px;
+      text-align: center;
+    }
+
+    .hour-time {
+      color: var(--sub);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .hour-wx {
+      align-self: center;
+      line-height: 1.25;
+      font-weight: 740;
+      overflow-wrap: anywhere;
+    }
+
+    .hour-temp {
+      font-size: 1.18rem;
+      font-weight: 820;
+    }
+
+    .hour-meta {
+      display: grid;
+      gap: 2px;
+      color: var(--sub);
+      font-size: 0.74rem;
+      line-height: 1.2;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .metric {
+      min-height: 94px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      border-radius: 8px;
+      padding: 11px;
+    }
+
+    .metric-label {
+      color: var(--sub);
+      font-size: 0.79rem;
+      margin-bottom: 7px;
+    }
+
+    .metric-value {
+      font-size: 1.33rem;
+      line-height: 1.2;
+      font-weight: 820;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-note {
+      color: var(--sub);
+      font-size: 0.76rem;
+      line-height: 1.35;
+      margin-top: 6px;
+    }
+
+    .daily-list {
+      display: grid;
+      gap: 2px;
+    }
+
+    .day-row {
+      min-height: 48px;
+      display: grid;
+      grid-template-columns: 4.7rem minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .day-row:last-child { border-bottom: 0; }
+
+    .day-name {
+      font-weight: 780;
+    }
+
+    .day-wx {
+      color: var(--sub);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+
+    .day-range {
+      font-weight: 820;
+      white-space: nowrap;
+    }
+
+    .advice-box {
+      display: grid;
+      gap: 12px;
+    }
+
+    .ai-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--sub);
+      font-size: 0.78rem;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+    }
+
+    .advice-summary {
+      font-size: 1.12rem;
+      line-height: 1.5;
+      font-weight: 820;
+    }
+
+    .outfit-list {
+      display: grid;
+    }
+
+    .outfit-item {
+      display: grid;
+      grid-template-columns: 3.6rem minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      line-height: 1.5;
+    }
+
+    .outfit-item:last-child { border-bottom: 0; }
+
+    .outfit-item strong {
+      color: var(--sub);
+      font-size: 0.88rem;
+    }
+
+    .empty {
+      color: var(--sub);
+      font-style: italic;
+      line-height: 1.55;
+    }
+
+    .ok { color: var(--green); }
+    .warn { color: var(--amber); }
+    .bad { color: var(--red); }
+
+    @media (max-width: 380px) {
+      .phone { padding-left: 10px; padding-right: 10px; }
+      .weather-card { padding: 16px; min-height: 330px; }
+      .manual { grid-template-columns: 1fr; }
+      .manual .btn { border-radius: 8px; }
+      .metric-grid { grid-template-columns: 1fr; }
+      .temp-row { grid-template-columns: 1fr; gap: 8px; }
+      .condition { padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone">
+    <header class="app-header">
+      <div class="brand">
+        <small>AI Weather Outfit</small>
+        <h1>氣象穿搭顧問</h1>
+      </div>
+      <div class="icon-actions">
+        <button class="icon-btn" id="useGpsBtn" type="button" title="使用定位" aria-label="使用定位">⌖</button>
+        <button class="icon-btn primary" id="refreshBtn" type="button" title="更新資料" aria-label="更新資料">↻</button>
+      </div>
+    </header>
+
+    <section class="weather-card" aria-live="polite">
+      <div class="place-row">
+        <div class="place">
+          <div class="place-label">目前位置</div>
+          <h2 class="place-name" id="locationText">讀取中</h2>
+        </div>
+        <div class="updated" id="updatedText">--</div>
+      </div>
+
+      <div class="temp-row">
+        <div class="temp"><span id="currentTemp">--</span><sup>°C</sup></div>
+        <div class="condition">
+          <div class="condition-main" id="currentWx">天氣資料讀取中</div>
+          <div class="condition-sub" id="currentRange">高溫 --° / 低溫 --°</div>
+        </div>
+      </div>
+
+      <div class="status-row">
+        <span class="pill" id="comfortTag">分析中</span>
+        <div class="source" id="sourceText">資料來源：CWA / MOENV</div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-head">
+        <h2>手動查詢</h2>
+        <span class="sheet-note">定位不準時使用</span>
+      </div>
+      <div class="manual">
+        <select class="field" id="citySelect" aria-label="縣市"></select>
+        <input class="field" id="districtInput" type="text" inputmode="text" placeholder="信義區" />
+        <button class="btn primary" id="manualBtn" type="button">查詢</button>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-head">
+        <h2>未來時段</h2>
+        <span class="sheet-note">CWA 多為 3 小時間隔</span>
+      </div>
+      <div class="hour-strip" id="hourlyList">
+        <div class="empty">尚無時段資料。</div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-head">
+        <h2>環境細節</h2>
+        <span class="sheet-note" id="dataQualityText">資料整理中</span>
+      </div>
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="metric-label">空氣品質</div>
+          <div class="metric-value" id="aqiValue">--</div>
+          <div class="metric-note" id="pm25Value">PM2.5 --</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">目前雨量</div>
+          <div class="metric-value" id="rainValue">-- mm</div>
+          <div class="metric-note" id="popValue">降雨機率 --%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">紫外線</div>
+          <div class="metric-value" id="uviValue">--</div>
+          <div class="metric-note" id="uviNote">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">濕度 / 體感</div>
+          <div class="metric-value" id="rhValue">--%</div>
+          <div class="metric-note" id="atValue">體感 --°</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">風速</div>
+          <div class="metric-value" id="windValue">-- m/s</div>
+          <div class="metric-note" id="windNote">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">能見度</div>
+          <div class="metric-value" id="visValue">--</div>
+          <div class="metric-note">鄰近觀測站</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-head">
+        <h2>今日穿搭</h2>
+        <span class="sheet-note" id="aiModeText">AI 狀態：檢查中</span>
+      </div>
+      <div class="advice-box">
+        <div class="ai-row">
+          <span id="aiExplainText">會依溫度、體感、雨、風、AQI 與紫外線判斷。</span>
+          <span class="pill" id="riskTag">--</span>
+        </div>
+        <div class="advice-summary" id="adviceSummary">取得資料後會產生建議。</div>
+        <div class="outfit-list" id="outfitList"></div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-head">
+        <h2>一週趨勢</h2>
+        <span class="sheet-note">白天 / 晚上彙整</span>
+      </div>
+      <div class="daily-list" id="dailyList">
+        <div class="empty">尚無一週資料。</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const CWA_KEY = "CWA-C5C92ABF-B103-4A78-AC3C-5E468DEC784D";
+    const MOENV_KEY = "e8dd42e6-9b8b-43f8-991e-b3dee723a52d";
+    const CWA_BASE = "https://opendata.cwa.gov.tw/api/v1/rest/datastore";
+    const AI_PROXY_URL = "";
+
+    const CITY_DATASETS = {
+      "宜蘭縣": "001",
+      "桃園市": "005",
+      "新竹縣": "009",
+      "苗栗縣": "013",
+      "彰化縣": "017",
+      "南投縣": "021",
+      "雲林縣": "025",
+      "嘉義縣": "029",
+      "屏東縣": "033",
+      "臺東縣": "037",
+      "花蓮縣": "041",
+      "澎湖縣": "045",
+      "基隆市": "049",
+      "新竹市": "053",
+      "嘉義市": "057",
+      "臺北市": "061",
+      "高雄市": "065",
+      "新北市": "069",
+      "臺中市": "073",
+      "臺南市": "077",
+      "連江縣": "081",
+      "金門縣": "085"
+    };
+
+    const FALLBACK_LOCATION = { city: "臺北市", district: "信義區", source: "預設地點" };
+
+    const ELEMENT_ALIASES = {
+      temp: ["T", "溫度", "平均溫度"],
+      wx: ["Wx", "天氣現象", "天氣"],
+      max: ["MaxT", "最高溫度", "最高溫"],
+      min: ["MinT", "最低溫度", "最低溫"],
+      rh: ["RH", "相對濕度", "濕度"],
+      wind: ["WS", "風速"],
+      windDir: ["WD", "風向"],
+      apparent: ["AT", "體感溫度", "體感"],
+      comfort: ["CI", "舒適度指數", "舒適度"],
+      pop3h: ["PoP3h", "PoP", "3小時降雨機率", "三小時降雨機率", "降雨機率"],
+      pop6h: ["PoP6h", "PoP", "6小時降雨機率", "六小時降雨機率", "降雨機率"],
+      pop12h: ["PoP12h", "PoP", "12小時降雨機率", "十二小時降雨機率", "降雨機率"],
+      uvi: ["UVI", "紫外線指數", "紫外線"],
+      weatherDescription: ["天氣預報綜合描述", "WeatherDescription"]
+    };
+
+    const VALUE_KEYS = {
+      temp: ["Temperature", "MaxTemperature", "MinTemperature", "value", "Value"],
+      wx: ["Weather", "Wx", "value", "Value"],
+      max: ["MaxTemperature", "MaxT", "Temperature", "value", "Value"],
+      min: ["MinTemperature", "MinT", "Temperature", "value", "Value"],
+      rh: ["RelativeHumidity", "RH", "value", "Value"],
+      wind: ["WindSpeed", "WS", "value", "Value"],
+      windDir: ["WindDirection", "WD", "value", "Value"],
+      apparent: ["ApparentTemperature", "AT", "Temperature", "value", "Value"],
+      comfort: ["ComfortIndexDescription", "ComfortIndex", "CI", "value", "Value"],
+      pop3h: ["ProbabilityOfPrecipitation", "PoP3h", "PoP", "value", "Value"],
+      pop6h: ["ProbabilityOfPrecipitation", "PoP6h", "PoP", "value", "Value"],
+      pop12h: ["ProbabilityOfPrecipitation", "PoP12h", "PoP", "value", "Value"],
+      uvi: ["UVIndex", "UVI", "value", "Value"],
+      weatherDescription: ["WeatherDescription", "value", "Value"]
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function normalizeTaiwanName(value = "") {
+      return String(value)
+        .replace(/台/g, "臺")
+        .replace(/\s/g, "")
+        .trim();
+    }
+
+    function setLoading(isLoading) {
+      ["refreshBtn", "useGpsBtn", "manualBtn"].forEach((id) => {
+        $(id).disabled = isLoading;
+      });
+    }
+
+    function setStatus(message, source = "CWA / MOENV") {
+      $("sourceText").textContent = message || `資料來源：${source}`;
+    }
+
+    function datasetFor7Day(city) {
+      const base = CITY_DATASETS[city] || CITY_DATASETS[FALLBACK_LOCATION.city];
+      return String(Number(base) + 2).padStart(3, "0");
+    }
+
+    function cwaUrl(dataset, params = {}) {
+      const url = new URL(`${CWA_BASE}/${dataset}`);
+      url.searchParams.set("Authorization", CWA_KEY);
+      url.searchParams.set("format", "JSON");
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          url.searchParams.set(key, value);
+        }
+      });
+      return url.toString();
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    async function safeJson(url) {
+      try {
+        const json = await fetchJson(url);
+        if (json.success === false || json.success === "false") return null;
+        return json;
+      } catch (error) {
+        console.warn("fetch failed", url, error);
+        return null;
+      }
+    }
+
+    function listFromMaybe(value) {
+      if (!value) return [];
+      return Array.isArray(value) ? value : [value];
+    }
+
+    function forecastLocations(json) {
+      const records = json?.records || {};
+      const locations = listFromMaybe(records.locations || records.Locations);
+      const grouped = locations.flatMap((group) => listFromMaybe(group.location || group.Location));
+      const direct = listFromMaybe(records.location || records.Location);
+      return [...grouped, ...direct];
+    }
+
+    function pickForecastLocation(json, district) {
+      const locations = forecastLocations(json);
+      const key = normalizeTaiwanName(district);
+      return locations.find((loc) => normalizeTaiwanName(loc.locationName || loc.LocationName).includes(key)) || locations[0] || null;
+    }
+
+    function weatherElements(location) {
+      return listFromMaybe(location?.weatherElement || location?.WeatherElement);
+    }
+
+    function element(location, aliases) {
+      const names = listFromMaybe(aliases);
+      const elements = weatherElements(location);
+      return elements.find((item) => names.includes(item.elementName || item.ElementName))
+        || elements.find((item) => names.some((name) => String(item.elementName || item.ElementName || "").includes(name)))
+        || null;
+    }
+
+    function times(location, key) {
+      return listFromMaybe(element(location, ELEMENT_ALIASES[key])?.time || element(location, ELEMENT_ALIASES[key])?.Time);
+    }
+
+    function valueOf(entry, fallback = "--", preferredKeys = []) {
+      const values = listFromMaybe(entry?.elementValue || entry?.ElementValue);
+      const first = values[0] || {};
+      const candidates = [...preferredKeys, "value", "Value", "measures", "Measures"];
+      let raw;
+      for (const key of candidates) {
+        if (first[key] !== undefined && first[key] !== null && first[key] !== "") {
+          raw = first[key];
+          break;
+        }
+      }
+      if (raw === undefined) {
+        const generic = Object.entries(first).find(([key, value]) => (
+          value !== undefined
+          && value !== null
+          && value !== ""
+          && !/Code$/i.test(key)
+          && !/Unit$/i.test(key)
+        ));
+        raw = generic?.[1] ?? entry?.value ?? entry?.Value ?? fallback;
+      }
+      if (raw === "" || raw === undefined || raw === null || raw === "-99" || raw === "-999") return fallback;
+      return String(raw);
+    }
+
+    function valueAt(location, key, index = 0, fallback = "--") {
+      return valueOf(times(location, key)[index], fallback, VALUE_KEYS[key] || []);
+    }
+
+    function toNumber(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function cleanRain(value) {
+      if (value === undefined || value === null || value === "" || value === "-99" || value === "-999") return "0.0";
+      const n = Number(value);
+      return Number.isFinite(n) ? n.toFixed(1) : String(value);
+    }
+
+    function startTime(entry) {
+      return entry?.dataTime || entry?.DataTime || entry?.startTime || entry?.StartTime || "";
+    }
+
+    function endTime(entry) {
+      return entry?.endTime || entry?.EndTime || "";
+    }
+
+    function formatHour(entry) {
+      const start = new Date(startTime(entry));
+      const end = new Date(endTime(entry));
+      if (Number.isNaN(start.getTime())) return "--";
+      const h1 = String(start.getHours()).padStart(2, "0");
+      if (!Number.isNaN(end.getTime())) {
+        const h2 = String(end.getHours()).padStart(2, "0");
+        return `${h1}-${h2}`;
+      }
+      return `${h1}:00`;
+    }
+
+    function formatUpdated() {
+      return new Intl.DateTimeFormat("zh-TW", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(new Date());
+    }
+
+    function formatWeekday(entry, index) {
+      const date = new Date(startTime(entry));
+      if (Number.isNaN(date.getTime())) return `第 ${index + 1} 天`;
+      return new Intl.DateTimeFormat("zh-TW", {
+        weekday: "short",
+        month: "numeric",
+        day: "numeric"
+      }).format(date);
+    }
+
+    function obsStations(json) {
+      return listFromMaybe(json?.records?.Station || json?.records?.station);
+    }
+
+    function stationTown(station) {
+      return normalizeTaiwanName(station?.GeoInfo?.TownName || station?.GeoInfo?.CountyName || station?.StationName || "");
+    }
+
+    function findStation(json, district, city) {
+      const stations = obsStations(json);
+      const townKey = normalizeTaiwanName(district).replace(/區|鄉|鎮|市$/, "");
+      const cityKey = normalizeTaiwanName(city);
+      return stations.find((station) => stationTown(station).includes(townKey))
+        || stations.find((station) => normalizeTaiwanName(station?.GeoInfo?.CountyName || "").includes(cityKey))
+        || stations[0]
+        || null;
+    }
+
+    function stationValue(station, keys, fallback = "--") {
+      const node = station?.WeatherElement || station?.weatherElement || station?.RainfallElement || {};
+      for (const key of keys) {
+        const value = key.split(".").reduce((acc, part) => acc?.[part], node);
+        if (value !== undefined && value !== null && value !== "" && value !== "-99" && value !== "-999") return String(value);
+      }
+      return fallback;
+    }
+
+    function findAqi(records, city, district) {
+      const rows = listFromMaybe(records?.records);
+      const cityKey = normalizeTaiwanName(city);
+      const districtKey = normalizeTaiwanName(district).replace(/區|鄉|鎮|市$/, "");
+      return rows.find((row) => normalizeTaiwanName(row.county).includes(cityKey) && normalizeTaiwanName(row.sitename).includes(districtKey))
+        || rows.find((row) => normalizeTaiwanName(row.county).includes(cityKey))
+        || null;
+    }
+
+    function uviLocations(json) {
+      return listFromMaybe(json?.records?.weatherElement?.location || json?.records?.location || json?.records?.Location);
+    }
+
+    function findUvi(json, city) {
+      const rows = uviLocations(json);
+      const cityKey = normalizeTaiwanName(city);
+      return rows.find((row) => normalizeTaiwanName(row.County || row.county || row.CountyName).includes(cityKey)) || rows[0] || null;
+    }
+
+    async function reverseGeocode(lat, lon) {
+      const nlscUrl = `https://api.nlsc.gov.tw/other/TownVillagePointQuery/${lon}/${lat}`;
+      const bigDataUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh-TW`;
+
+      try {
+        const text = await fetch(nlscUrl).then((res) => res.ok ? res.text() : "");
+        const city = normalizeTaiwanName(text.match(/<ctyName>(.*?)<\/ctyName>/)?.[1] || "");
+        const district = normalizeTaiwanName(text.match(/<townName>(.*?)<\/townName>/)?.[1] || "");
+        if (city && district) return { city, district, source: "國土測繪圖資服務雲" };
+      } catch (error) {
+        console.warn("NLSC failed", error);
+      }
+
+      const geo = await fetchJson(bigDataUrl);
+      return {
+        city: normalizeTaiwanName(geo.principalSubdivision || FALLBACK_LOCATION.city),
+        district: normalizeTaiwanName(geo.locality || geo.city || FALLBACK_LOCATION.district),
+        source: "BigDataCloud"
+      };
+    }
+
+    function getGpsPosition() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("此瀏覽器不支援定位"));
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 9000,
+          maximumAge: 10 * 60 * 1000
+        });
+      });
+    }
+
+    function buildHourly(loc3d, currentRain) {
+      const tempTimes = times(loc3d, "temp");
+      const wxTimes = times(loc3d, "wx");
+      const popTimes = times(loc3d, "pop3h").length ? times(loc3d, "pop3h") : (times(loc3d, "pop6h").length ? times(loc3d, "pop6h") : times(loc3d, "pop12h"));
+      const rhTimes = times(loc3d, "rh");
+      const atTimes = times(loc3d, "apparent");
+      const windTimes = times(loc3d, "wind");
+      const length = Math.max(tempTimes.length, wxTimes.length, popTimes.length, rhTimes.length, atTimes.length, windTimes.length);
+
+      return Array.from({ length: Math.min(length, 12) }, (_, index) => {
+        const anchor = tempTimes[index] || wxTimes[index] || popTimes[index] || {};
+        const popEntry = popTimes[index] || popTimes[Math.floor(index / 2)] || popTimes[0];
+        return {
+          time: formatHour(anchor),
+          temp: valueOf(tempTimes[index], "--", VALUE_KEYS.temp),
+          wx: valueOf(wxTimes[index] || wxTimes[Math.floor(index / 2)] || wxTimes[0], "--", VALUE_KEYS.wx),
+          pop: valueOf(popEntry, "--", VALUE_KEYS.pop3h),
+          rain: index === 0 ? currentRain : "--",
+          rh: valueOf(rhTimes[index] || rhTimes[Math.floor(index / 2)], "--", VALUE_KEYS.rh),
+          apparent: valueOf(atTimes[index] || atTimes[Math.floor(index / 2)], "--", VALUE_KEYS.apparent),
+          wind: valueOf(windTimes[index] || windTimes[Math.floor(index / 2)], "--", VALUE_KEYS.wind)
+        };
+      }).filter((item) => item.time !== "--" || item.temp !== "--" || item.wx !== "--");
+    }
+
+    function buildDaily(loc7d) {
+      const wx = times(loc7d, "wx");
+      const max = times(loc7d, "max");
+      const min = times(loc7d, "min");
+      const pop = times(loc7d, "pop12h").length ? times(loc7d, "pop12h") : times(loc7d, "pop6h");
+      return Array.from({ length: 7 }, (_, index) => {
+        const i = index * 2;
+        const anchor = wx[i] || max[i] || min[i] || pop[i] || {};
+        return {
+          day: formatWeekday(anchor, index),
+          wx: valueOf(wx[i] || wx[index], "--", VALUE_KEYS.wx),
+          max: valueOf(max[i] || max[index], "--", VALUE_KEYS.max),
+          min: valueOf(min[i] || min[index], "--", VALUE_KEYS.min),
+          pop: valueOf(pop[i] || pop[index], "--", VALUE_KEYS.pop12h)
+        };
+      }).filter((item) => item.wx !== "--" || item.max !== "--" || item.min !== "--");
+    }
+
+    function cityForecastFallback(json, city) {
+      const cityKey = normalizeTaiwanName(city);
+      const loc = forecastLocations(json).find((item) => normalizeTaiwanName(item.locationName || item.LocationName).includes(cityKey))
+        || forecastLocations(json)[0]
+        || null;
+      if (!loc) return null;
+      return {
+        wx: valueAt(loc, "wx", 0),
+        pop: valueAt(loc, "pop12h", 0),
+        min: valueAt(loc, "min", 0),
+        max: valueAt(loc, "max", 0)
+      };
+    }
+
+    async function loadWeather(place) {
+      const city = CITY_DATASETS[place.city] ? place.city : FALLBACK_LOCATION.city;
+      const district = place.district || FALLBACK_LOCATION.district;
+      const baseId = CITY_DATASETS[city];
+      const id7 = datasetFor7Day(city);
+
+      const [forecast3d, forecast7d, city36h, obs, rainObs, uviObs, aqi] = await Promise.all([
+        safeJson(cwaUrl(`F-D0047-${baseId}`, { locationName: district })),
+        safeJson(cwaUrl(`F-D0047-${id7}`, { locationName: district })),
+        safeJson(cwaUrl("F-C0032-001", { locationName: city })),
+        safeJson(cwaUrl("O-A0001-001")),
+        safeJson(cwaUrl("O-A0002-001")),
+        safeJson(cwaUrl("O-A0005-001")),
+        safeJson(`https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&api_key=${MOENV_KEY}&limit=1000&format=JSON`)
+      ]);
+
+      const loc3d = pickForecastLocation(forecast3d, district);
+      const loc7d = pickForecastLocation(forecast7d, district);
+      const station = findStation(obs, district, city);
+      const rainStation = findStation(rainObs, district, city);
+      const aqiRow = findAqi(aqi, city, district);
+      const uviRow = findUvi(uviObs, city);
+      const cityFallback = cityForecastFallback(city36h, city);
+
+      const currentRain = cleanRain(stationValue(rainStation, ["Now.Precipitation", "Past1hr.Precipitation", "Precipitation"], "0"));
+      const current = {
+        city,
+        district,
+        temp: stationValue(station, ["AirTemperature", "Temperature"], valueAt(loc3d, "temp")),
+        wx: valueAt(loc3d, "wx", 0, cityFallback?.wx || "未提供"),
+        max: valueAt(loc7d, "max", 0, valueAt(loc3d, "max", 0, cityFallback?.max || "--")),
+        min: valueAt(loc7d, "min", 0, valueAt(loc3d, "min", 0, cityFallback?.min || "--")),
+        rh: stationValue(station, ["RelativeHumidity"], valueAt(loc3d, "rh")),
+        wind: stationValue(station, ["WindSpeed"], valueAt(loc3d, "wind")),
+        windDir: stationValue(station, ["WindDirection"], valueAt(loc3d, "windDir")),
+        visibility: stationValue(station, ["VisibilityDescription", "Visibility"], "未提供"),
+        apparent: valueAt(loc3d, "apparent", 0, stationValue(station, ["AirTemperature"], "--")),
+        comfort: valueAt(loc3d, "comfort", 0, "--"),
+        rain: currentRain,
+        pop: valueAt(loc3d, "pop3h", 0, valueAt(loc3d, "pop6h", 0, valueAt(loc3d, "pop12h", 0, cityFallback?.pop || "--"))),
+        uvi: uviRow?.UVIndex || uviRow?.uvi || valueAt(loc7d, "uvi"),
+        aqi: aqiRow?.aqi || "--",
+        aqiStatus: aqiRow?.status || "未提供",
+        pm25: aqiRow?.["pm2.5"] || "--"
+      };
+
+      const hourly = buildHourly(loc3d, current.rain);
+      const daily = buildDaily(loc7d);
+      const missing = [
+        !loc3d && "鄉鎮預報",
+        !cityFallback && "36小時縣市預報",
+        !station && "即時觀測",
+        !rainStation && "雨量站",
+        !aqiRow && "AQI",
+        !uviRow && "UVI"
+      ].filter(Boolean);
+
+      return {
+        place: { city, district, source: place.source || "手動輸入" },
+        current,
+        hourly,
+        daily,
+        missing,
+        updatedAt: formatUpdated()
+      };
+    }
+
+    async function fetchAiAdvice(data) {
+      if (!AI_PROXY_URL) return null;
+      try {
+        const res = await fetch(AI_PROXY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            location: data.place,
+            current: data.current,
+            hourly: data.hourly.slice(0, 6),
+            daily: data.daily.slice(0, 3)
+          })
+        });
+        if (!res.ok) throw new Error(`AI HTTP ${res.status}`);
+        return res.json();
+      } catch (error) {
+        console.warn("AI proxy failed", error);
+        return null;
+      }
+    }
+
+    function localAdvice(data) {
+      const temp = toNumber(data.current.apparent) ?? toNumber(data.current.temp);
+      const rain = toNumber(data.current.rain) ?? 0;
+      const pop = toNumber(data.current.pop) ?? 0;
+      const uvi = toNumber(data.current.uvi) ?? 0;
+      const wind = toNumber(data.current.wind) ?? 0;
+      const aqi = toNumber(data.current.aqi) ?? 0;
+      const rh = toNumber(data.current.rh) ?? 0;
+      const wx = data.current.wx || "";
+
+      let summary = "用輕便、好活動的搭配出門。";
+      let top = "透氣上衣";
+      let bottom = "長褲或中長裙";
+      let outerwear = "可不帶外套";
+      let accessories = "日常隨身物";
+      let risk = "舒適";
+
+      if (temp !== null && temp >= 31) {
+        summary = rh >= 75 ? "高溫又潮濕，優先選快乾與寬鬆版型。" : "炎熱偏曬，穿薄料並加強防曬。";
+        top = "排汗短袖、薄襯衫";
+        bottom = "短褲、薄長褲或透氣裙裝";
+        risk = "悶熱";
+      } else if (temp !== null && temp >= 26) {
+        summary = "溫暖偏熱，薄層穿搭最穩。";
+        top = "棉質短袖、薄襯衫";
+        bottom = "薄長褲、寬褲或裙裝";
+      } else if (temp !== null && temp >= 21) {
+        summary = "體感舒適，早晚可多一層薄外搭。";
+        top = "短袖或薄長袖";
+        bottom = "牛仔褲、卡其褲或中長裙";
+        outerwear = "薄外套或襯衫外搭";
+      } else if (temp !== null && temp >= 16) {
+        summary = "早晚偏涼，外層要能擋風。";
+        top = "長袖上衣或薄針織";
+        bottom = "長褲";
+        outerwear = "輕量外套";
+        risk = "偏涼";
+      } else if (temp !== null) {
+        summary = "偏冷，保暖層要確實。";
+        top = "發熱衣或厚長袖";
+        bottom = "厚長褲";
+        outerwear = "保暖外套";
+        risk = "偏冷";
+      }
+
+      if (rain > 0 || pop >= 50 || /雨|雷/.test(wx)) {
+        accessories = "折傘、防潑水鞋、快乾包款";
+        if (outerwear === "可不帶外套") outerwear = "薄防水外套備用";
+        risk = "降雨";
+      }
+
+      if (uvi >= 6) accessories += "、帽子、太陽眼鏡、防曬";
+      if (wind >= 8) outerwear = outerwear.includes("外套") ? `${outerwear}，避免寬鬆外層` : "防風薄外套";
+      if (aqi > 100) {
+        accessories += "、口罩";
+        risk = "空品";
+      }
+
+      return { summary, top, bottom, outerwear, accessories, risk, mode: "本地智慧規則" };
+    }
+
+    async function buildAdvice(data) {
+      const ai = await fetchAiAdvice(data);
+      if (ai?.summary) return { ...ai, mode: "後端 AI" };
+      return localAdvice(data);
+    }
+
+    function comfortTag(data) {
+      const temp = toNumber(data.current.apparent) ?? toNumber(data.current.temp);
+      const rain = toNumber(data.current.rain) ?? 0;
+      const pop = toNumber(data.current.pop) ?? 0;
+      const aqi = toNumber(data.current.aqi) ?? 0;
+      if (rain > 0 || pop >= 50) return { text: "雨具優先", cls: "warn" };
+      if (aqi > 100) return { text: "空品留意", cls: "bad" };
+      if (temp !== null && temp >= 31) return { text: "炎熱", cls: "warn" };
+      if (temp !== null && temp <= 16) return { text: "偏冷", cls: "warn" };
+      return { text: "舒適", cls: "ok" };
+    }
+
+    function uviNote(value) {
+      const uvi = toNumber(value);
+      if (uvi === null) return "未提供";
+      if (uvi >= 8) return "很強，請加強防曬";
+      if (uvi >= 6) return "偏高，建議防曬";
+      if (uvi >= 3) return "中等，戶外可防曬";
+      return "低量級";
+    }
+
+    function windNote(value) {
+      const wind = toNumber(value);
+      if (wind === null) return "未提供";
+      if (wind >= 8) return "風感明顯";
+      if (wind >= 4) return "微風到和風";
+      return "風弱";
+    }
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    function shortWx(value) {
+      const text = String(value || "--");
+      return text.length > 5 ? `${text.slice(0, 5)}...` : text;
+    }
+
+    async function render(data) {
+      $("locationText").textContent = `${data.place.city} ${data.place.district}`;
+      $("updatedText").textContent = data.updatedAt;
+      $("currentTemp").textContent = data.current.temp;
+      $("currentWx").textContent = data.current.wx;
+      $("currentRange").textContent = `高溫 ${data.current.max}° / 低溫 ${data.current.min}°`;
+      $("sourceText").textContent = `地名來源：${data.place.source}`;
+
+      const tag = comfortTag(data);
+      $("comfortTag").textContent = tag.text;
+      $("comfortTag").className = `pill ${tag.cls}`;
+
+      $("aqiValue").textContent = `${data.current.aqi} ${data.current.aqiStatus}`;
+      $("pm25Value").textContent = `PM2.5 ${data.current.pm25}`;
+      $("rainValue").textContent = `${data.current.rain} mm`;
+      $("popValue").textContent = `降雨機率 ${data.current.pop}%`;
+      $("uviValue").textContent = data.current.uvi;
+      $("uviNote").textContent = uviNote(data.current.uvi);
+      $("rhValue").textContent = `${data.current.rh}%`;
+      $("atValue").textContent = `體感 ${data.current.apparent}°`;
+      $("windValue").textContent = `${data.current.wind} m/s`;
+      $("windNote").textContent = `${windNote(data.current.wind)}${data.current.windDir !== "--" ? `，風向 ${data.current.windDir}` : ""}`;
+      $("visValue").textContent = data.current.visibility;
+      $("dataQualityText").textContent = data.missing.length ? `缺：${data.missing.join("、")}` : "資料完整";
+
+      $("hourlyList").innerHTML = data.hourly.length
+        ? data.hourly.map((item) => `
+          <div class="hour-card">
+            <div class="hour-time">${esc(item.time)}</div>
+            <div class="hour-wx">${esc(shortWx(item.wx))}</div>
+            <div class="hour-temp">${esc(item.temp)}°</div>
+            <div class="hour-meta">
+              <span>雨 ${esc(item.pop)}%</span>
+              <span>雨量 ${esc(item.rain)}mm</span>
+              <span>體感 ${esc(item.apparent)}°</span>
+            </div>
+          </div>
+        `).join("")
+        : `<div class="empty">目前沒有時段資料。請確認鄉鎮名稱是否與中央氣象署一致。</div>`;
+
+      $("dailyList").innerHTML = data.daily.length
+        ? data.daily.map((item) => `
+          <div class="day-row">
+            <div class="day-name">${esc(item.day)}</div>
+            <div class="day-wx">${esc(item.wx)}${item.pop !== "--" ? ` · 雨 ${esc(item.pop)}%` : ""}</div>
+            <div class="day-range">${esc(item.min)}° / ${esc(item.max)}°</div>
+          </div>
+        `).join("")
+        : `<div class="empty">目前沒有一週資料。</div>`;
+
+      $("aiModeText").textContent = AI_PROXY_URL ? "AI 狀態：後端 AI" : "AI 狀態：本地智慧規則";
+      $("aiExplainText").textContent = AI_PROXY_URL
+        ? "穿搭會送到後端 AI，由模型依氣象資料判斷。"
+        : "目前未接後端 AI，先用可解釋的本地規則判斷。";
+
+      const advice = await buildAdvice(data);
+      $("adviceSummary").textContent = advice.summary;
+      $("riskTag").textContent = advice.risk || "建議";
+      $("outfitList").innerHTML = [
+        ["上身", advice.top],
+        ["下身", advice.bottom],
+        ["外層", advice.outerwear],
+        ["配件", advice.accessories]
+      ].map(([label, value]) => `
+        <div class="outfit-item">
+          <strong>${label}</strong>
+          <span>${esc(value)}</span>
+        </div>
+      `).join("");
+    }
+
+    async function runWithPlace(place) {
+      setLoading(true);
+      setStatus("資料讀取中...");
+      $("locationText").textContent = `${place.city} ${place.district}`;
+      try {
+        const data = await loadWeather(place);
+        await render(data);
+        localStorage.setItem("lastPlace", JSON.stringify(data.place));
+      } catch (error) {
+        console.error(error);
+        $("sourceText").textContent = `讀取失敗：${error.message}`;
+        $("dataQualityText").textContent = "讀取失敗";
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function runGps() {
+      setLoading(true);
+      $("sourceText").textContent = "正在取得 GPS...";
+      try {
+        const position = await getGpsPosition();
+        const place = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+        await runWithPlace(place);
+      } catch (error) {
+        console.warn(error);
+        await runWithPlace(FALLBACK_LOCATION);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function initCitySelect() {
+      $("citySelect").innerHTML = Object.keys(CITY_DATASETS).map((city) => (
+        `<option value="${city}">${city}</option>`
+      )).join("");
+      $("citySelect").value = FALLBACK_LOCATION.city;
+      $("districtInput").value = FALLBACK_LOCATION.district;
+    }
+
+    function bindEvents() {
+      $("useGpsBtn").addEventListener("click", runGps);
+      $("refreshBtn").addEventListener("click", () => {
+        const last = JSON.parse(localStorage.getItem("lastPlace") || "null");
+        runWithPlace(last || FALLBACK_LOCATION);
+      });
+      $("manualBtn").addEventListener("click", () => {
+        const city = $("citySelect").value;
+        const district = normalizeTaiwanName($("districtInput").value) || FALLBACK_LOCATION.district;
+        runWithPlace({ city, district, source: "手動輸入" });
+      });
+    }
+
+    initCitySelect();
+    bindEvents();
+
+    const cachedPlace = JSON.parse(localStorage.getItem("lastPlace") || "null");
+    runWithPlace(cachedPlace || FALLBACK_LOCATION);
+  </script>
+</body>
+</html>
